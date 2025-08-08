@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-WebSocket SSH Server with Paramiko v1.0.1
-Paramiko를 사용한 WebSocket SSH 서버 v1.0.1
+WebSocket SSH Server with Paramiko v1.2.0
+Paramiko를 사용한 WebSocket SSH 서버 v1.2.0
 """
 
 import asyncio

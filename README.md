@@ -11,6 +11,7 @@ EPICS Alive 기반의 IOC 모니터링/관리 웹 애플리케이션입니다. �
 - **관리 기능**: IOC 마스크/언마스크, 삭제
 - **WebSocket SSH**: 브라우저에서 직접 SSH 접속
 - **환경 변수 표시**: IOC의 모든 환경 변수 확인
+- **PV Control**: BPC 기반 자동 PV 제어 기능 (선택적)
 
 ## 설치 및 실행 (처음 설치 포함)
 
@@ -95,7 +96,65 @@ IOC_Monitor/
   - xterm.js 5.3.0, xterm-addon-fit 0.8.0 (CSS/JS)
 - 이후 템플릿은 CDN 대신 로컬 자산을 참조하므로 인터넷 없이도 UI가 정상 동작합니다.
 
+## PV Control 기능 (선택적)
+
+### 개요
+BPC(Beam Position Control) 값과 IOC 상태를 기반으로 자동으로 EPICS PV를 제어하는 기능입니다.
+
+### 활성화 방법
+환경 변수를 설정하여 PV Control 기능을 활성화할 수 있습니다:
+
+```bash
+export IOC_MONITOR_PV_CONTROL_ENABLED=true
+```
+
+또는 `.env` 파일에 추가:
+```
+IOC_MONITOR_PV_CONTROL_ENABLED=true
+```
+
+### 설정 가능한 PV들
+
+#### 1. 임계값 PV (Threshold PV)
+- **기본값**: `TEST-CTRL:SYS-MACHINE:MODE`
+- **설정 방법**: 환경 변수 `IOC_MONITOR_THRESHOLD_PV`로 변경 가능
+- **용도**: BPC 비교를 위한 임계값을 실시간으로 제공
+
+#### 2. 제어 PV (Control PV)
+- **기본값**: `TEST-CTRL:SYS-IOCM:READY`
+- **설정 방법**: 환경 변수 `IOC_MONITOR_CONTROL_PV`로 변경 가능
+- **용도**: IOC Monitor Ready 상태를 나타내는 제어 신호
+
+### 설정 예시
+```bash
+# PV Control 기능 활성화
+export IOC_MONITOR_PV_CONTROL_ENABLED=true
+
+# 임계값 PV 변경 (선택사항)
+export IOC_MONITOR_THRESHOLD_PV=MY-SYS:MACHINE:MODE
+
+# 제어 PV 변경 (선택사항)
+export IOC_MONITOR_CONTROL_PV=MY-SYS:IOCM:READY
+```
+
+### 동작 원리
+1. **임계값 모니터링**: 설정된 임계값 PV에서 실시간으로 임계값을 읽어옴
+2. **IOC 상태 확인**: 모든 IOC의 BPC 값과 상태를 1초마다 확인
+3. **제어 로직**: 
+   - 꺼진 IOC 중 BPC ≥ 임계값인 것이 있으면 → 제어 PV를 0 (NOT READY)
+   - 모든 IOC가 정상이거나 BPC < 임계값인 꺼진 IOC만 있으면 → 제어 PV를 1 (READY)
+4. **BPC 값 파싱**: 16진수(0x00), 10진수(1), 2진수(0b1) 등 다양한 형식 지원
+
+### API 엔드포인트
+- `GET /api/pv/caget/<pvname>`: PV 값 읽기
+- `POST /api/pv/caput/<pvname>`: PV 값 설정
+- `GET /api/ioc_monitor_ready/status`: PV Control 상태 확인
+
+### 웹 UI 표시
+PV Control 기능이 활성화되면 웹 대시보드에 "IOC Monitor Ready Status" 섹션이 표시됩니다.
+
 ## 주의사항 / Notes
 - EPICS Base/CA 툴이 없으면 일부 기능(caget/caput)이 제한됩니다.
 - 방화벽에서 5001(웹), 8022(WebSocket SSH) 포트를 허용하세요.
+- PV Control 기능은 선택적이며, 활성화하지 않아도 기본 IOC 모니터링 기능은 정상 동작합니다.
 ``` 

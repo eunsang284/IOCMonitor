@@ -1,7 +1,7 @@
 #!/bin/bash
 
-# EPICS IOC Monitor Web Application Deployment Script v1.0.1
-# EPICS IOC 모니터 웹 애플리케이션 배포 스크립트 v1.0.1
+# EPICS IOC Monitor Web Application Deployment Script v1.2.0
+# EPICS IOC 모니터 웹 애플리케이션 배포 스크립트 v1.2.0
 # Deploys the Flask web application for IOC monitoring
 # IOC 모니터링을 위한 Flask 웹 애플리케이션을 배포합니다
 
@@ -641,8 +641,8 @@ main() {
 # Show usage / 사용법 표시
 show_usage() {
     VERSION=$(cat VERSION 2>/dev/null || echo "1.0.0")
-    echo "EPICS IOC Monitor Web Application Deployment Script v1.0.1${VERSION}"
-    echo "EPICS IOC 모니터 웹 애플리케이션 배포 스크립트 v1.0.1${VERSION}"
+    echo "EPICS IOC Monitor Web Application Deployment Script v1.2.0${VERSION}"
+    echo "EPICS IOC 모니터 웹 애플리케이션 배포 스크립트 v1.2.0${VERSION}"
     echo ""
     echo "Usage: $0 [deployment_mode]"
     echo ""

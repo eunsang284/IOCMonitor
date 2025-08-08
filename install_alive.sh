@@ -1,7 +1,7 @@
 #!/bin/bash
 
-# EPICS Alive Daemon Installation Script v1.0.1
-# EPICS Alive Daemon 설치 스크립트 v1.0.1
+# EPICS Alive Daemon Installation Script v1.2.0
+# EPICS Alive Daemon 설치 스크립트 v1.2.0
 # Builds and configures EPICS Alive Daemon within IOC Monitor directory
 # IOC Monitor 디렉토리 내에서 EPICS Alive Daemon을 빌드하고 설정합니다
 
