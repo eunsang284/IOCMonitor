@@ -144,6 +144,11 @@ class Config:
     FEATURE_FAULTED_MONITORING = os.environ.get("FEATURE_FAULTED_MONITORING", "true").lower() == "true"
     FEATURE_PV_CACHE = os.environ.get("FEATURE_PV_CACHE", "false").lower() == "true"
     
+    # PV Control feature - BPC-based IOC monitoring control / PV 제어 기능 - BPC 기반 IOC 모니터링 제어
+    FEATURE_PV_CONTROL = os.environ.get("IOC_MONITOR_PV_CONTROL_ENABLED", "false").lower() == "true"
+    PV_CONTROL_THRESHOLD_PV = os.environ.get("IOC_MONITOR_THRESHOLD_PV", "TEST-CTRL:SYS-MACHINE:MODE")
+    PV_CONTROL_CONTROL_PV = os.environ.get("IOC_MONITOR_CONTROL_PV", "TEST-CTRL:SYS-IOCM:READY")
+    
     # Monitoring settings / 모니터링 설정
     CACHE_UPDATE_INTERVAL = int(os.environ.get("CACHE_UPDATE_INTERVAL", "5"))  # seconds
     IOC_READY_UPDATE_INTERVAL = int(os.environ.get("IOC_READY_UPDATE_INTERVAL", "1"))  # seconds

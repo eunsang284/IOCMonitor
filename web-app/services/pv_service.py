@@ -32,9 +32,9 @@ class PVService:
         from config import Config
         self.config = Config()
         
-        # IOC Monitor Ready Control PVs
-        self.threshold_pv_name = "TEST-CTRL:SYS-MACHINE:MODE"
-        self.control_pv_name = "TEST-CTRL:SYS-IOCM:READY"
+        # IOC Monitor Ready Control PVs - Use config values
+        self.threshold_pv_name = self.config.PV_CONTROL_THRESHOLD_PV
+        self.control_pv_name = self.config.PV_CONTROL_CONTROL_PV
         
         # EPICS PV connections
         self.threshold_pv = None

@@ -125,16 +125,35 @@ IOC_MONITOR_PV_CONTROL_ENABLED=true
 - **설정 방법**: 환경 변수 `IOC_MONITOR_CONTROL_PV`로 변경 가능
 - **용도**: IOC Monitor Ready 상태를 나타내는 제어 신호
 
-### 설정 예시
+### 설정 방법
+
+#### 방법 1: .env 파일 사용 (권장)
+프로젝트 루트에 `.env` 파일을 생성하고 다음 내용을 추가:
+
 ```bash
-# PV Control 기능 활성화
+# .env 파일
+IOC_MONITOR_PV_CONTROL_ENABLED=true
+IOC_MONITOR_THRESHOLD_PV=MY-SYS:MACHINE:MODE
+IOC_MONITOR_CONTROL_PV=MY-SYS:IOCM:READY
+```
+
+#### 방법 2: 시스템 환경 변수 설정
+```bash
+# 현재 세션에만 적용
 export IOC_MONITOR_PV_CONTROL_ENABLED=true
-
-# 임계값 PV 변경 (선택사항)
 export IOC_MONITOR_THRESHOLD_PV=MY-SYS:MACHINE:MODE
-
-# 제어 PV 변경 (선택사항)
 export IOC_MONITOR_CONTROL_PV=MY-SYS:IOCM:READY
+
+# 영구 설정 (bashrc에 추가)
+echo 'export IOC_MONITOR_PV_CONTROL_ENABLED=true' >> ~/.bashrc
+echo 'export IOC_MONITOR_THRESHOLD_PV=MY-SYS:MACHINE:MODE' >> ~/.bashrc
+echo 'export IOC_MONITOR_CONTROL_PV=MY-SYS:IOCM:READY' >> ~/.bashrc
+source ~/.bashrc
+```
+
+#### 방법 3: 실행 시 직접 설정
+```bash
+IOC_MONITOR_PV_CONTROL_ENABLED=true ./deploy_web_app.sh development
 ```
 
 ### 동작 원리

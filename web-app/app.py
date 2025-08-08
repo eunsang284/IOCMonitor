@@ -21,6 +21,13 @@ from concurrent.futures import ThreadPoolExecutor
 from flask import Flask, jsonify, render_template, request, flash, url_for, session, redirect, make_response
 from flask_cors import CORS
 
+# Load environment variables from .env file
+try:
+    from dotenv import load_dotenv
+    load_dotenv()
+except ImportError:
+    print("Warning: python-dotenv not installed. Install with: pip install python-dotenv")
+
 # Add parent directory to path for imports
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
@@ -141,6 +148,13 @@ def api_alive_faulted():
 def api_ioc_monitor_ready_status():
     """Get IOC Monitor Ready status / IOC Monitor Ready 상태 조회"""
     try:
+        # Check if PV Control feature is enabled
+        if not app.config.get('FEATURE_PV_CONTROL', False):
+            return jsonify({
+                "enabled": False,
+                "message": "PV Control feature is not enabled. Set IOC_MONITOR_PV_CONTROL_ENABLED=true to enable."
+            })
+        
         status = pv_service.get_ioc_monitor_ready_status()
         return jsonify(status)
         
@@ -577,19 +591,22 @@ def start_background_threads():
     print("Starting Alive service monitoring...")
     alive_service.start_monitoring()
     
-    # Start IOC Monitor Ready control logic thread
-    def run_control_logic():
-        while True:
-            try:
-                pv_service.apply_control_logic()
-                time.sleep(0.1)  # 100ms 간격으로 체크
-            except Exception as e:
-                print(f"[ERROR] Control logic error: {e}")
-                time.sleep(1)
-    
-    control_thread = threading.Thread(target=run_control_logic, daemon=True)
-    control_thread.start()
-    print("Started IOC Monitor Ready control logic thread")
+    # Start IOC Monitor Ready control logic thread only if PV Control is enabled
+    if app.config.get('FEATURE_PV_CONTROL', False):
+        def run_control_logic():
+            while True:
+                try:
+                    pv_service.apply_control_logic()
+                    time.sleep(0.1)  # 100ms 간격으로 체크
+                except Exception as e:
+                    print(f"[ERROR] Control logic error: {e}")
+                    time.sleep(1)
+        
+        control_thread = threading.Thread(target=run_control_logic, daemon=True)
+        control_thread.start()
+        print("Started IOC Monitor Ready control logic thread")
+    else:
+        print("PV Control feature is disabled. Set IOC_MONITOR_PV_CONTROL_ENABLED=true to enable.")
 
 if __name__ == "__main__":
     # Register signal handlers for graceful shutdown
