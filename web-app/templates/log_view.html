@@ -1,0 +1,286 @@
+{% extends "base.html" %}
+
+{% block title %}{{ ioc_name }} Event Log{% endblock %}
+
+{% block extra_css %}
+<style>
+    .info-section {
+        background-color: #f8f9fa;
+        padding: 20px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+    }
+    .info-section h5 {
+        color: #00a2cc;
+        margin-bottom: 15px;
+    }
+    .info-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+    .info-table th, .info-table td {
+        padding: 8px;
+        text-align: left;
+        border-bottom: 1px solid #ddd;
+    }
+    .info-table th {
+        background-color: #e9ecef;
+        font-weight: bold;
+        width: 150px;
+    }
+    .log-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 20px;
+    }
+    .log-table th, .log-table td {
+        padding: 10px;
+        text-align: left;
+        border-bottom: 1px solid #ddd;
+    }
+    .log-table th {
+        background-color: #00a2cc;
+        color: white;
+        font-weight: bold;
+    }
+    .log-table tr:hover {
+        background-color: #f8f9fa;
+    }
+    .back-link {
+        display: inline-block;
+        margin-bottom: 20px;
+        color: #00a2cc;
+        text-decoration: none;
+    }
+    .back-link:hover {
+        text-decoration: underline;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<a href="/" class="back-link">← Back to Dashboard</a>
+
+<h2>{{ ioc_name }} Event Log</h2>
+
+{% if info %}
+<div class="info-section">
+    <h5>General Information</h5>
+    <table class="info-table">
+        <tr>
+            <th>IOC Name</th>
+            <td>{{ ioc_name }}</td>
+        </tr>
+        <tr>
+            <th>Status</th>
+            <td>
+                {{ info.status | default("N/A") }}
+                {% if info.status and info.status|lower == "offline" %}↓{% endif %}
+            </td>
+        </tr>
+        <tr>
+            <th>IP Address</th>
+            <td>{{ info.ip_address | default("N/A") }}</td>
+        </tr>
+        <tr>
+            <th>Incarnation</th>
+            <td>{{ info.incarnation | default("N/A") }}</td>
+        </tr>
+        <tr>
+            <th>Last Seen</th>
+            <td>{{ info.last_seen | default("N/A") }}</td>
+        </tr>
+        <tr>
+            <th>Uptime</th>
+            <td>{{ info.uptime | default("N/A") }}</td>
+        </tr>
+        <tr>
+            <th>Message</th>
+            <td>{{ info.message | default("N/A") }}</td>
+        </tr>
+    </table>
+</div>
+
+<div class="info-section">
+    <h5>Environment Variables</h5>
+    <table class="info-table">
+        <tr>
+            <th>ARCH</th>
+            <td>{{ info.ARCH | default("N/A") }}</td>
+        </tr>
+        <tr>
+            <th>TOP</th>
+            <td>{{ info.TOP | default("N/A") }}</td>
+        </tr>
+        <tr>
+            <th>EPICS_BASE</th>
+            <td>{{ info.EPICS_BASE | default("N/A") }}</td>
+        </tr>
+        <tr>
+            <th>SUPPORT</th>
+            <td>{{ info.SUPPORT | default("N/A") }}</td>
+        </tr>
+        <tr>
+            <th>ENGINEER</th>
+            <td>{{ info.ENGINEER | default("N/A") }}</td>
+        </tr>
+        <tr>
+            <th>GROUP</th>
+            <td>{{ info.GROUP | default("N/A") }}</td>
+        </tr>
+        <tr>
+            <th>LOCATION</th>
+            <td>{{ info.LOCATION | default("N/A") }}</td>
+        </tr>
+        <tr>
+            <th>DBLIST</th>
+            <td>{{ info.DBLIST | default("N/A") }}</td>
+        </tr>
+        <tr>
+            <th>PURPOSE</th>
+            <td>{{ info.PURPOSE | default("N/A") }}</td>
+        </tr>
+        <tr>
+            <th>BPC</th>
+            <td>{{ info.BPC | default("N/A") }}</td>
+        </tr>
+        <tr>
+            <th>ENV1</th>
+            <td>{{ info.ENV1 | default("N/A") }}</td>
+        </tr>
+        <tr>
+            <th>ENV2</th>
+            <td>{{ info.ENV2 | default("N/A") }}</td>
+        </tr>
+        <tr>
+            <th>ENV3</th>
+            <td>{{ info.ENV3 | default("N/A") }}</td>
+        </tr>
+        <tr>
+            <th>ENV4</th>
+            <td>{{ info.ENV4 | default("N/A") }}</td>
+        </tr>
+        <tr>
+            <th>ENV5</th>
+            <td>{{ info.ENV5 | default("N/A") }}</td>
+        </tr>
+        <tr>
+            <th>ENV6</th>
+            <td>{{ info.ENV6 | default("N/A") }}</td>
+        </tr>
+        <tr>
+            <th>ENV7</th>
+            <td>{{ info.ENV7 | default("N/A") }}</td>
+        </tr>
+        <tr>
+            <th>ENV8</th>
+            <td>{{ info.ENV8 | default("N/A") }}</td>
+        </tr>
+        <tr>
+            <th>ENV9</th>
+            <td>{{ info.ENV9 | default("N/A") }}</td>
+        </tr>
+        <tr>
+            <th>ENV10</th>
+            <td>{{ info.ENV10 | default("N/A") }}</td>
+        </tr>
+        <tr>
+            <th>ENV11</th>
+            <td>{{ info.ENV11 | default("N/A") }}</td>
+        </tr>
+        <tr>
+            <th>ENV12</th>
+            <td>{{ info.ENV12 | default("N/A") }}</td>
+        </tr>
+        <tr>
+            <th>ENV13</th>
+            <td>{{ info.ENV13 | default("N/A") }}</td>
+        </tr>
+        <tr>
+            <th>ENV14</th>
+            <td>{{ info.ENV14 | default("N/A") }}</td>
+        </tr>
+        <tr>
+            <th>ENV15</th>
+            <td>{{ info.ENV15 | default("N/A") }}</td>
+        </tr>
+        <tr>
+            <th>ENV16</th>
+            <td>{{ info.ENV16 | default("N/A") }}</td>
+        </tr>
+    </table>
+</div>
+
+<div class="info-section">
+    <h5>Linux Parameters</h5>
+    <table class="info-table">
+        <tr>
+            <th>User</th>
+            <td>{{ info.user | default("N/A") }}</td>
+        </tr>
+        <tr>
+            <th>Group</th>
+            <td>{{ info.group | default("N/A") }}</td>
+        </tr>
+        <tr>
+            <th>Host</th>
+            <td>{{ info.host | default("N/A") }}</td>
+        </tr>
+    </table>
+</div>
+{% endif %}
+
+<h5 style="color: #b30000;">Event Log</h5>
+<div class="table-responsive">
+    <table class="log-table">
+        <thead>
+            <tr>
+                <th>Time</th>
+                <th>Event</th>
+                <th>IP</th>
+                <th>Code</th>
+            </tr>
+        </thead>
+        <tbody id="log-table-body">
+            {% for log in logs %}
+            <tr>
+                <td>{{ log.time }}</td>
+                <td><strong>{{ log.event }}</strong></td>
+                <td>{{ log.ip }}</td>
+                <td>{{ log.code }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    async function refreshLogTable() {
+        try {
+            const response = await fetch("/api/ioc_logs/{{ ioc_name }}");
+            if (!response.ok) throw new Error("Server response failed");
+            
+            const data = await response.json();
+            const tbody = document.querySelector("#log-table-body");
+            tbody.innerHTML = "";
+            
+            data.logs.forEach(log => {
+                const row = `<tr>
+                    <td>${log.time}</td>
+                    <td><strong>${log.event}</strong></td>
+                    <td>${log.ip}</td>
+                    <td>${log.code}</td>
+                </tr>`;
+                tbody.innerHTML += row;
+            });
+        } catch (error) {
+            console.error("❌ Log refresh failed:", error);
+        }
+    }
+
+    // Refresh log table every 10 seconds
+    setInterval(refreshLogTable, 10000);
+</script>
+{% endblock %}

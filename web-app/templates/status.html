@@ -1,0 +1,99 @@
+{% extends "base.html" %}
+
+{% block title %}Server Status{% endblock %}
+
+{% block extra_css %}
+<style>
+    .status-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 20px;
+    }
+    .status-table th, .status-table td {
+        padding: 15px;
+        text-align: left;
+        border-bottom: 1px solid #ddd;
+    }
+    .status-table th {
+        background-color: #00a2cc;
+        color: white;
+        font-weight: bold;
+    }
+    .status-table tr:hover {
+        background-color: #f8f9fa;
+    }
+    .status-running {
+        color: #155724;
+        font-weight: bold;
+    }
+    .status-stopped {
+        color: #721c24;
+        font-weight: bold;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<h2>Server Status</h2>
+
+<table class="status-table">
+    <thead>
+        <tr>
+            <th>Service</th>
+            <th>Status</th>
+        </tr>
+    </thead>
+    <tbody id="status-table-body">
+        <tr>
+            <td colspan="2" style="text-align: center;">Loading...</td>
+        </tr>
+    </tbody>
+</table>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    async function fetchStatus() {
+        try {
+            const response = await fetch('/api/status');
+            const data = await response.json();
+            const tbody = document.querySelector('#status-table-body');
+            tbody.innerHTML = '';
+
+            for (const [name, state] of Object.entries(data)) {
+                const tr = document.createElement('tr');
+                const nameTd = document.createElement('td');
+                const statusTd = document.createElement('td');
+                
+                nameTd.textContent = name;
+                statusTd.textContent = state;
+                
+                if (state.includes('RUNNING')) {
+                    statusTd.className = 'status-running';
+                } else if (state.includes('STOPPED')) {
+                    statusTd.className = 'status-stopped';
+                }
+                
+                tr.appendChild(nameTd);
+                tr.appendChild(statusTd);
+                tbody.appendChild(tr);
+            }
+        } catch (error) {
+            console.error('Error fetching status:', error);
+            document.querySelector('#status-table-body').innerHTML = 
+                '<tr><td colspan="2" style="text-align: center; color: red;">Error loading status</td></tr>';
+        }
+    }
+
+    // Load initial data and refresh every 5 seconds
+    fetchStatus();
+    setInterval(fetchStatus, 5000);
+    
+    // Also refresh when page becomes visible
+    document.addEventListener('visibilitychange', function() {
+        if (!document.hidden) {
+            fetchStatus();
+        }
+    });
+</script>
+{% endblock %}

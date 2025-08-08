@@ -1,0 +1,101 @@
+# EPICS IOC Monitor
+
+**Webbased EPICS IOC Monitoring System**
+
+EPICS Alive 기반의 IOC 모니터링/관리 웹 애플리케이션입니다. 오프라인 환경에서도 동작하도록 정적 자산(부트스트랩, xterm.js)을 로컬에 캐시합니다.
+
+## 주요 기능
+
+- **IOC 상태 모니터링**: 실시간 IOC 상태 확인
+- **이벤트 로그**: IOC별 상세 로그 및 서버 로그
+- **관리 기능**: IOC 마스크/언마스크, 삭제
+- **WebSocket SSH**: 브라우저에서 직접 SSH 접속
+- **환경 변수 표시**: IOC의 모든 환경 변수 확인
+
+## 설치 및 실행 (처음 설치 포함)
+
+### 0. 사전 요구사항
+- Linux (Ubuntu/Debian 권장), sudo 권한
+- 인터넷 연결(최초 캐시 용도), 이후 오프라인 실행 가능
+- 시스템 패키지: git, build-essential, gcc, make, curl 또는 wget, python3, python3-venv, python3-dev, libssl-dev, libffi-dev
+- EPICS Base와 CA 툴(caget/caput)이 PATH에 존재 (없다면 caget/caput 관련 기능은 제한됨)
+
+### 1. Alive 설치
+```bash
+./install_alive.sh
+```
+
+### 2. 개발 모드로 실행 (WebSocket SSH 포함)
+```bash
+./deploy_web_app.sh development
+```
+
+### 3. 프로덕션 모드로 실행 (WebSocket SSH 포함)
+```bash
+./deploy_web_app.sh production
+```
+
+### 4. WebSocket SSH 서버만 실행
+```bash
+./deploy_web_app.sh wssh
+```
+
+### 5. WebSocket SSH 서버 중지
+```bash
+./deploy_web_app.sh stop-wssh
+```
+
+## WebSocket SSH 기능 (브라우저 SSH)
+
+WebSocket SSH를 사용하면 브라우저에서 직접 IOC에 SSH 접속할 수 있습니다.
+
+### 자동 실행 / Auto-start
+- **개발 모드**와 **프로덕션 모드**에서 WebSocket SSH 서버가 자동으로 백그라운드에서 시작됩니다.
+- 별도 설정 없이 SSH 기능을 바로 사용할 수 있습니다.
+
+### 수동 실행:
+WebSocket SSH 서버만 별도로 실행하려면:
+```bash
+./deploy_web_app.sh wssh
+```
+
+### 사용 방법 / How to use
+1. IOC Monitor 웹 페이지에서 로그인 후 SSH 버튼 클릭
+2. 로그인 창에서 계정 입력 후 연결하면 브라우저 내 xterm 기반 터미널이 열립니다.
+
+### SSH 서버 중지:
+```bash
+./deploy_web_app.sh stop-wssh
+```
+
+## 관리자 계정 / Admin Credentials
+
+- **초기 계정**: `raon` / `raon`
+- 로그인 후 SSH, 마스크, 삭제 기능 사용 가능
+
+## 포트 정보 / Ports
+
+- **웹 서버**: 5001
+- **WebSocket SSH**: 8022
+
+## 파일 구조 / File Layout
+
+```
+IOC_Monitor/
+├── web-app/                 # Flask 웹 애플리케이션
+├── venv/                   # Python 가상환경
+├── logs/                   # 로그 파일들
+├── deploy_web_app.sh       # 배포 스크립트
+├── start_wssh.sh          # WebSocket SSH 서버 스크립트
+└── README.md              # 이 파일
+
+## 오프라인 자산 / Offline Assets
+- 배포 스크립트가 최초 실행 시 다음 자산을 `web-app/static/vendor` 경로에 다운로드/캐시합니다.
+  - Bootstrap 5.3.0 (CSS/JS)
+  - xterm.js 5.3.0, xterm-addon-fit 0.8.0 (CSS/JS)
+- 이후 템플릿은 CDN 대신 로컬 자산을 참조하므로 인터넷 없이도 UI가 정상 동작합니다.
+
+## 주의사항 / Notes
+- EPICS Base/CA 툴이 없으면 일부 기능(caget/caput)이 제한됩니다.
+- 방화벽에서 5001(웹), 8022(WebSocket SSH) 포트를 허용하세요.
+``` 

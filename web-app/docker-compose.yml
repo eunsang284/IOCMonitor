@@ -1,0 +1,72 @@
+# EPICS IOC Monitor Web Application Docker Compose
+# EPICS IOC 모니터 웹 애플리케이션 Docker Compose
+
+version: '3.8'
+
+services:
+  ioc-monitor-web:
+    build: .
+    container_name: ioc-monitor-web
+    ports:
+      - "5000:5000"
+    environment:
+      - FLASK_ENV=production
+      - FLASK_DEBUG=false
+      - SECRET_KEY=${SECRET_KEY:-your-secret-key-here}
+      - LOG_LEVEL=INFO
+    volumes:
+      # Mount EPICS environment / EPICS 환경 마운트
+      - /opt/epics:/opt/epics:ro
+      - /usr/local/epics:/usr/local/epics:ro
+      # Mount IOC Monitor data / IOC 모니터 데이터 마운트
+      - ../src:/app/src:ro
+      - ../logs:/app/logs
+      - ../config:/app/config
+      - ../cache:/app/cache
+      # Mount EPICS tools / EPICS 도구 마운트
+      - /usr/local/bin:/usr/local/bin:ro
+    networks:
+      - ioc-monitor-network
+    restart: unless-stopped
+    depends_on:
+      - redis
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/api/status"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  redis:
+    image: redis:7-alpine
+    container_name: ioc-monitor-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    networks:
+      - ioc-monitor-network
+    restart: unless-stopped
+    command: redis-server --appendonly yes
+
+  nginx:
+    image: nginx:alpine
+    container_name: ioc-monitor-nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./ssl:/etc/nginx/ssl:ro
+    networks:
+      - ioc-monitor-network
+    restart: unless-stopped
+    depends_on:
+      - ioc-monitor-web
+
+volumes:
+  redis-data:
+
+networks:
+  ioc-monitor-network:
+    driver: bridge 

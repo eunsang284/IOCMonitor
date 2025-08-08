@@ -1,0 +1,28 @@
+# EPICS IOC Monitor Web Application Dependencies
+# EPICS IOC 모니터 웹 애플리케이션 의존성
+
+# Web Framework / 웹 프레임워크
+Flask==2.3.3
+Flask-CORS==4.0.0
+
+# Data Processing / 데이터 처리
+pandas==2.1.1
+numpy==1.24.3
+
+# HTTP Requests / HTTP 요청
+requests==2.31.0
+
+# Environment Management / 환경 관리
+python-dotenv==1.0.0
+
+# Logging / 로깅
+structlog==23.1.0
+
+# Development Tools (optional) / 개발 도구 (선택사항)
+# pytest==7.4.2
+# black==23.7.0
+# flake8==6.0.0
+
+# Production Server (optional) / 프로덕션 서버 (선택사항)
+# gunicorn==21.2.0
+# uwsgi==2.0.22 

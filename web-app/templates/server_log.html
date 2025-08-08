@@ -1,0 +1,216 @@
+{% extends "base.html" %}
+
+{% block title %}IOCMonitor Logs{% endblock %}
+
+{% block extra_css %}
+<style>
+    .log-section {
+        margin-bottom: 30px;
+    }
+    .log-section h5 {
+        color: #00a2cc;
+        margin-bottom: 15px;
+        border-bottom: 2px solid #00a2cc;
+        padding-bottom: 5px;
+    }
+    .log-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 10px;
+    }
+    .log-table th, .log-table td {
+        padding: 8px;
+        text-align: left;
+        border-bottom: 1px solid #ddd;
+        font-family: monospace;
+        font-size: 0.9em;
+    }
+    .log-table th {
+        background-color: #00a2cc;
+        color: white;
+        font-weight: bold;
+    }
+    .log-table tr:hover {
+        background-color: #f8f9fa;
+    }
+    .log-content {
+        background-color: #f8f9fa;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        padding: 15px;
+        font-family: monospace;
+        font-size: 0.9em;
+        white-space: pre-wrap;
+        max-height: 400px;
+        overflow-y: auto;
+    }
+    .date-selector {
+        margin-bottom: 20px;
+    }
+    .date-selector select {
+        padding: 8px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        margin-right: 10px;
+    }
+    .refresh-btn {
+        background-color: #00a2cc;
+        color: white;
+        border: none;
+        padding: 8px 15px;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 0.9em;
+    }
+    .refresh-btn:hover {
+        background-color: #008bb0;
+    }
+    .back-link {
+        display: inline-block;
+        margin-bottom: 20px;
+        color: #00a2cc;
+        text-decoration: none;
+    }
+    .back-link:hover {
+        text-decoration: underline;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<a href="/" class="back-link">← Back to Dashboard</a>
+
+<h2>IOCMonitor Logs</h2>
+
+<div class="log-section">
+    <h5>IOCMonitor Logs</h5>
+    <div class="date-selector">
+        <label for="log-date">Select Date:</label>
+        <select id="log-date" onchange="loadLogByDate()">
+            <option value="">Loading dates...</option>
+        </select>
+        <button class="refresh-btn" onclick="refreshLogDates()">Refresh</button>
+    </div>
+    <div id="log-content" class="log-content">
+        Select a date to view logs...
+    </div>
+</div>
+
+<div class="log-section">
+    <h5>Recent Events</h5>
+    <div class="table-responsive">
+        <table class="log-table">
+            <thead>
+                <tr>
+                    <th>Time</th>
+                    <th>Event</th>
+                    <th>IP</th>
+                    <th>Code</th>
+                </tr>
+            </thead>
+            <tbody id="events-table-body">
+                <tr>
+                    <td colspan="4" style="text-align: center;">Loading events...</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Load initial data
+    loadLogDates();
+    loadRecentEvents();
+    
+    // Refresh every 30 seconds
+    setInterval(() => {
+        loadRecentEvents();
+    }, 30000);
+    
+    // Also refresh when page becomes visible
+    document.addEventListener('visibilitychange', function() {
+        if (!document.hidden) {
+            loadRecentEvents();
+        }
+    });
+    
+    async function loadLogDates() {
+        try {
+            const response = await fetch('/server_log_dates');
+            const dates = await response.json();
+            
+            const select = document.getElementById('log-date');
+            select.innerHTML = '<option value="">Select a date...</option>';
+            
+            dates.forEach(date => {
+                const option = document.createElement('option');
+                option.value = date;
+                option.textContent = date;
+                select.appendChild(option);
+            });
+        } catch (error) {
+            console.error('Error loading log dates:', error);
+            document.getElementById('log-date').innerHTML = '<option value="">Error loading dates</option>';
+        }
+    }
+    
+    async function loadLogByDate() {
+        const date = document.getElementById('log-date').value;
+        if (!date) {
+            document.getElementById('log-content').textContent = 'Select a date to view logs...';
+            return;
+        }
+        
+        try {
+            const response = await fetch(`/server_log/${date}`);
+            const content = await response.text();
+            document.getElementById('log-content').textContent = content;
+        } catch (error) {
+            console.error('Error loading log for date:', error);
+            document.getElementById('log-content').textContent = 'Error loading log content';
+        }
+    }
+    
+    async function loadRecentEvents() {
+        try {
+            const response = await fetch('/api/alive/ioc_details');
+            const iocDetails = await response.json();
+            
+            const tbody = document.getElementById('events-table-body');
+            tbody.innerHTML = '';
+            
+            // Get all IOC events from events.txt
+            const eventsResponse = await fetch('/api/events');
+            const events = await eventsResponse.json();
+            
+            // Show last 20 events
+            const recentEvents = events.slice(-20);
+            
+            recentEvents.forEach(event => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${event.time}</td>
+                    <td><strong>${event.event}</strong></td>
+                    <td>${event.ip}</td>
+                    <td>${event.code}</td>
+                `;
+                tbody.appendChild(row);
+            });
+            
+            if (recentEvents.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="4" style="text-align: center;">No recent events</td></tr>';
+            }
+        } catch (error) {
+            console.error('Error loading recent events:', error);
+            document.getElementById('events-table-body').innerHTML = 
+                '<tr><td colspan="4" style="text-align: center; color: red;">Error loading events</td></tr>';
+        }
+    }
+    
+    function refreshLogDates() {
+        loadLogDates();
+    }
+</script>
+{% endblock %} 

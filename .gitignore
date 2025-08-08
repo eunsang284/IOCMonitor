@@ -1,0 +1,105 @@
+# EPICS IOC Monitor Git Ignore
+# EPICS IOC 모니터 Git 무시 파일
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Virtual Environment
+venv/
+env/
+ENV/
+env.bak/
+venv.bak/
+
+# Flask
+instance/
+.webassets-cache
+
+# Logs
+logs/
+*.log
+websocket_ssh.log
+*.pid
+
+# Cache
+cache/
+.cache/
+*.cache
+
+# Build artifacts
+build/
+alive-server/
+alive-client/
+alive-web/
+
+# Configuration (may contain sensitive data)
+config.env
+.env
+*.env
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Temporary files
+*.tmp
+*.temp
+*.bak
+*.backup
+
+# EPICS specific
+*.db
+*.template
+*.substitutions
+
+# Web assets (downloaded during deployment)
+web-app/static/vendor/
+
+# Database files
+*.sqlite
+*.db
+
+# PID files
+*.pid
+
+# SSH keys and certificates
+*.pem
+*.key
+*.crt
+*.p12
+
+# Backup files
+*.orig
+*.rej 

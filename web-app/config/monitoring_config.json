@@ -1,0 +1,64 @@
+{
+  "monitoring_pvs": {
+    "System_Status": {
+      "address": "SYSTEM:STATUS",
+      "description": "System status PV",
+      "enabled": true
+    },
+    "Machine_Mode": {
+      "address": "MACHINE:MODE",
+      "description": "Machine mode PV",
+      "enabled": true
+    },
+    "Beam_Status": {
+      "address": "BEAM:STATUS",
+      "description": "Beam status PV",
+      "enabled": true
+    },
+    "IOC_Ready": {
+      "address": "IOC:READY",
+      "description": "IOC ready status PV",
+      "enabled": true
+    }
+  },
+  "control_pvs": {
+    "IOC_Ready": {
+      "address": "IOC:READY",
+      "description": "IOC ready control PV",
+      "enabled": true,
+      "conditions": {
+        "faulted_ioc_count": {
+          "operator": "==",
+          "value": 0,
+          "set_value": "1",
+          "description": "Set IOC_Ready to 1 when no faulted IOCs"
+        }
+      }
+    },
+    "System_Alert": {
+      "address": "SYSTEM:ALERT",
+      "description": "System alert control PV",
+      "enabled": false,
+      "conditions": {
+        "faulted_ioc_count": {
+          "operator": ">",
+          "value": 5,
+          "set_value": "1",
+          "description": "Set alert when more than 5 IOCs are faulted"
+        }
+      }
+    }
+  },
+  "intervals": {
+    "cache_update": 5,
+    "control_update": 1,
+    "faulted_monitor": 5,
+    "pv_cache_update": 30
+  },
+  "features": {
+    "control_pv_enabled": true,
+    "faulted_monitoring_enabled": true,
+    "pv_cache_enabled": true,
+    "logging_enabled": true
+  }
+}

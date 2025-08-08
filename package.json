@@ -1,0 +1,50 @@
+{
+  "name": "epics-ioc-monitor",
+  "version": "1.0.1",
+  "description": "Webbased EPICS IOC Monitoring System",
+  "main": "web-app/app.py",
+  "scripts": {
+    "start": "./deploy_web_app.sh development",
+    "start:prod": "./deploy_web_app.sh production",
+    "install:alive": "./install_alive.sh",
+    "ssh:start": "./deploy_web_app.sh wssh",
+    "ssh:stop": "./deploy_web_app.sh stop-wssh",
+    "clean": "./deploy_web_app.sh clean"
+  },
+  "keywords": [
+    "epics",
+    "ioc",
+    "monitoring",
+    "control-system",
+    "flask",
+    "websocket",
+    "ssh"
+  ],
+  "author": "EPICS IOC Monitor Team",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/your-username/IOCMonitor.git"
+  },
+  "bugs": {
+    "url": "https://github.com/your-username/IOCMonitor/issues"
+  },
+  "homepage": "https://github.com/your-username/IOCMonitor#readme",
+  "engines": {
+    "python": ">=3.8",
+    "node": ">=14.0.0"
+  },
+  "dependencies": {
+    "python": ">=3.8",
+    "flask": ">=2.3.3",
+    "paramiko": ">=3.0.0",
+    "websockets": ">=11.0.0"
+  },
+  "devDependencies": {},
+  "os": [
+    "linux"
+  ],
+  "cpu": [
+    "x64"
+  ]
+} 
