@@ -64,6 +64,8 @@ from services.log_service import LogService
 from services.alive_service import AliveService
 from utils.helpers import safe_str, format_uptime
 
+
+
 # Initialize services
 ioc_monitor = IOCMonitor()
 pv_service = PVService()
@@ -134,6 +136,122 @@ def api_alive_status():
 def api_alive_faulted():
     """Get current faulted IOCs information / 현재 장애 IOC 정보"""
     return jsonify(alive_service.get_faulted_iocs_info())
+
+@app.route("/api/ioc_monitor_ready/status")
+def api_ioc_monitor_ready_status():
+    """Get IOC Monitor Ready status / IOC Monitor Ready 상태 조회"""
+    try:
+        status = pv_service.get_ioc_monitor_ready_status()
+        return jsonify(status)
+        
+    except Exception as e:
+        return jsonify({
+            "enabled": False, 
+            "error": f"Failed to get IOC Monitor Ready status: {str(e)}"
+        })
+
+@app.route("/api/ioc_monitor_ready/set", methods=["POST"])
+def api_ioc_monitor_ready_set():
+    """Set IOC Monitor Ready value / IOC Monitor Ready 값 설정"""
+    try:
+        data = request.get_json()
+        value = data.get("value", 1)
+        
+        success = pv_service.set_control_value(float(value))
+        
+        if success:
+            return jsonify({"success": True, "message": f"Control PV set to {value}"})
+        else:
+            return jsonify({"success": False, "error": "Failed to set control PV"}), 500
+            
+    except Exception as e:
+        return jsonify({
+            "success": False, 
+            "error": f"Failed to set IOC Monitor Ready value: {str(e)}"
+        }), 500
+
+@app.route("/api/pv/caget/<pvname>")
+def api_pv_caget(pvname):
+    """Get PV value using caget / caget을 사용하여 PV 값 읽기"""
+    try:
+        import subprocess
+        result = subprocess.run(['caget', pvname], 
+                              capture_output=True, text=True, timeout=10)
+        
+        if result.returncode == 0:
+            # caget 출력 파싱: "PV_NAME value"
+            output = result.stdout.strip()
+            if ' ' in output:
+                pv_name, value = output.split(' ', 1)
+                return jsonify({
+                    "success": True,
+                    "pv": pvname,
+                    "value": value,
+                    "raw_output": output
+                })
+            else:
+                return jsonify({
+                    "success": False,
+                    "error": f"Unexpected caget output format: {output}"
+                }), 500
+        else:
+            return jsonify({
+                "success": False,
+                "error": f"caget failed: {result.stderr}"
+            }), 500
+            
+    except subprocess.TimeoutExpired:
+        return jsonify({
+            "success": False,
+            "error": "caget timeout"
+        }), 500
+    except Exception as e:
+        return jsonify({
+            "success": False,
+            "error": f"Failed to get PV value: {str(e)}"
+        }), 500
+
+@app.route("/api/pv/caput/<pvname>", methods=["POST"])
+def api_pv_caput(pvname):
+    """Set PV value using caput / caput을 사용하여 PV 값 설정"""
+    try:
+        data = request.get_json()
+        value = data.get("value")
+        
+        if value is None:
+            return jsonify({
+                "success": False,
+                "error": "Value is required"
+            }), 400
+        
+        import subprocess
+        result = subprocess.run(['caput', pvname, str(value)], 
+                              capture_output=True, text=True, timeout=10)
+        
+        if result.returncode == 0:
+            return jsonify({
+                "success": True,
+                "pv": pvname,
+                "value": value,
+                "message": f"PV {pvname} set to {value}",
+                "raw_output": result.stdout.strip()
+            })
+        else:
+            return jsonify({
+                "success": False,
+                "error": f"caput failed: {result.stderr}"
+            }), 500
+            
+    except subprocess.TimeoutExpired:
+        return jsonify({
+            "success": False,
+            "error": "caput timeout"
+        }), 500
+    except Exception as e:
+        return jsonify({
+            "success": False,
+            "error": f"Failed to set PV value: {str(e)}"
+        }), 500
 
 @app.route("/api/data")
 def api_data():
@@ -458,6 +576,20 @@ def start_background_threads():
     """Start background monitoring threads / 백그라운드 모니터링 스레드 시작"""
     print("Starting Alive service monitoring...")
     alive_service.start_monitoring()
+    
+    # Start IOC Monitor Ready control logic thread
+    def run_control_logic():
+        while True:
+            try:
+                pv_service.apply_control_logic()
+                time.sleep(0.1)  # 100ms 간격으로 체크
+            except Exception as e:
+                print(f"[ERROR] Control logic error: {e}")
+                time.sleep(1)
+    
+    control_thread = threading.Thread(target=run_control_logic, daemon=True)
+    control_thread.start()
+    print("Started IOC Monitor Ready control logic thread")
 
 if __name__ == "__main__":
     # Register signal handlers for graceful shutdown

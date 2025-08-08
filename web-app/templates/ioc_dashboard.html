@@ -79,6 +79,10 @@
         color: #155724;
         font-weight: bold;
     }
+    .status-offline {
+        color: #721c24;
+        font-weight: bold;
+    }
     .status-error {
         color: #721c24;
         font-weight: bold;
@@ -142,6 +146,42 @@
     .delete-btn:hover {
         background-color: #c82333;
     }
+    .pvws-status-card {
+        background-color: #f8f9fa;
+        padding: 20px;
+        border-radius: 8px;
+        border-left: 4px solid #6f42c1;
+        text-align: center;
+        margin-bottom: 20px;
+    }
+    .pvws-status-card h3 {
+        margin-top: 0;
+        color: #495057;
+    }
+    .pvws-enabled {
+        color: #28a745;
+        font-weight: bold;
+    }
+    .pvws-disabled {
+        color: #dc3545;
+        font-weight: bold;
+    }
+    .pvws-value {
+        font-size: 1.5em;
+        font-weight: bold;
+        margin: 10px 0;
+    }
+    .pvws-value.ready {
+        color: #28a745;
+    }
+    .pvws-value.not-ready {
+        color: #dc3545;
+    }
+    .pvws-details {
+        font-size: 0.9em;
+        color: #666;
+        margin-top: 10px;
+    }
     @media (max-width: 768px) {
         .table {
             font-size: 0.9em;
@@ -177,6 +217,21 @@
     </div>
 </div>
 
+<!-- PVWS Status Card -->
+<div id="pvws-status-container" style="display: none;">
+    <div class="pvws-status-card">
+        <h3>IOC Monitor Ready Status</h3>
+        <div id="pvws-status" class="pvws-enabled">PVWS Enabled</div>
+        <div id="pvws-value" class="pvws-value ready">READY</div>
+        <div id="pvws-details" class="pvws-details">
+            <div>Threshold PV: <span id="pvws-threshold-pv">-</span></div>
+            <div>Current Threshold: <span id="pvws-threshold-value">-</span></div>
+            <div>Control PV: <span id="pvws-control-pv">-</span></div>
+            <div>Connection Status: <span id="pvws-connection-status">-</span></div>
+        </div>
+    </div>
+</div>
+
 <div id="error-message" class="error" style="display: none;"></div>
 
 <div id="ioc-container">
@@ -191,11 +246,13 @@
     // Load initial data
     loadStatusSummary();
     loadIocList();
+    loadPvwsStatus();
     
     // Refresh data every 10 seconds
     setInterval(() => {
         loadStatusSummary();
         loadIocList();
+        loadPvwsStatus();
     }, 10000);
     
     function loadStatusSummary() {
@@ -229,6 +286,50 @@
             .catch(error => {
                 console.error('Error loading IOC list:', error);
                 showError('Failed to load IOC list');
+            });
+    }
+    
+    function loadPvwsStatus() {
+        fetch('/api/ioc_monitor_ready/status')
+            .then(response => response.json())
+            .then(data => {
+                console.log('IOC Monitor Ready data:', data); // Debug log
+                if (data.enabled) {
+                    document.getElementById('pvws-status-container').style.display = 'block';
+                    document.getElementById('pvws-status').textContent = 'IOC Monitor Ready Enabled';
+                    document.getElementById('pvws-status').className = 'pvws-enabled';
+                    
+                    // Update IOC Monitor Ready value
+                    const pvwsValue = document.getElementById('pvws-value');
+                    console.log('Control value:', data.control_value, 'Type:', typeof data.control_value); // Debug log
+                    if (data.control_value == 1 || data.control_value === 1.0) {
+                        pvwsValue.textContent = 'READY';
+                        pvwsValue.className = 'pvws-value ready';
+                    } else if (data.control_value == 0 || data.control_value === 0.0) {
+                        pvwsValue.textContent = 'NOT READY';
+                        pvwsValue.className = 'pvws-value not-ready';
+                    } else {
+                        pvwsValue.textContent = 'UNKNOWN (' + data.control_value + ')';
+                        pvwsValue.className = 'pvws-value';
+                    }
+                    
+                    // Update details
+                    document.getElementById('pvws-threshold-pv').textContent = data.threshold_pv;
+                    document.getElementById('pvws-threshold-value').textContent = data.threshold_value || 'N/A';
+                    document.getElementById('pvws-control-pv').textContent = data.control_pv;
+                    
+                    // Connection status
+                    const thresholdConnected = data.threshold_connected ? 'Connected' : 'Disconnected';
+                    const controlConnected = data.control_connected ? 'Connected' : 'Disconnected';
+                    document.getElementById('pvws-connection-status').textContent = 
+                        `Threshold: ${thresholdConnected}, Control: ${controlConnected}`;
+                } else {
+                    document.getElementById('pvws-status-container').style.display = 'none';
+                }
+            })
+            .catch(error => {
+                console.error('Error loading IOC Monitor Ready status:', error);
+                // Don't show error as it's optional
             });
     }
     
@@ -282,10 +383,11 @@
             nameCell.textContent = ioc.name;
             row.appendChild(nameCell);
             
-            // Status
+            // Status - Use overall_status and last_seen to determine actual status
             const statusCell = document.createElement('td');
-            statusCell.className = getStatusClass(ioc.status);
-            statusCell.textContent = ioc.status;
+            const actualStatus = getActualStatus(ioc);
+            statusCell.className = getStatusClass(actualStatus);
+            statusCell.textContent = actualStatus;
             row.appendChild(statusCell);
             
             // IP Address
@@ -377,9 +479,43 @@
         container.appendChild(table);
     }
     
+    function getActualStatus(ioc) {
+        // Check overall_status first
+        const overallStatus = ioc.overall_status;
+        if (overallStatus === 'DO' || overallStatus === 'D' || overallStatus === 'DOWN') {
+            return 'OFFLINE';
+        }
+        
+        // Check last_seen time (if older than 60 seconds, consider offline)
+        const lastSeenStr = ioc.last_seen;
+        if (lastSeenStr) {
+            try {
+                const currentTime = new Date();
+                const lastSeenTime = new Date(lastSeenStr);
+                const timeDiff = (currentTime - lastSeenTime) / 1000; // seconds
+                
+                if (timeDiff > 60) { // 1 minute = 60 seconds
+                    return 'OFFLINE';
+                }
+            } catch (e) {
+                console.error('Error parsing last_seen:', e);
+            }
+        }
+        
+        // If overall_status is 'U' (Up) and last_seen is recent, consider online
+        if (overallStatus === 'U' || overallStatus === 'UP') {
+            return 'ONLINE';
+        }
+        
+        // Default to the original status if we can't determine
+        return ioc.status || 'UNKNOWN';
+    }
+    
     function getStatusClass(status) {
         if (status === 'ONLINE' || status === 'RUNNING') {
             return 'status-online';
+        } else if (status === 'OFFLINE' || status === 'DOWN') {
+            return 'status-offline';
         } else if (status === 'ERROR' || status === 'FAILED') {
             return 'status-error';
         } else {
