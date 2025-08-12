@@ -31,6 +31,14 @@ print_error() {
     echo -e "${RED}[ERROR]${NC} $1"
 }
 
+# Load configuration / 설정 로드
+if [ -f "load_config.sh" ]; then
+    source "load_config.sh"
+    print_status "Configuration loaded from config.env"
+else
+    print_warning "load_config.sh not found, using default configuration"
+fi
+
 # Configuration / 설정
 WEB_APP_DIR="web-app"
 VENV_DIR="venv"
@@ -315,7 +323,17 @@ deploy_development() {
     export FLASK_HOST=0.0.0.0
     export FLASK_PORT=5001
     
+    # Pass PV Control environment variables to the web app / PV Control 환경 변수를 웹 앱에 전달
+    export IOC_MONITOR_PV_CONTROL_ENABLED="$IOC_MONITOR_PV_CONTROL_ENABLED"
+    export IOC_MONITOR_DEBUG_LOG="$IOC_MONITOR_DEBUG_LOG"
+    export IOC_MONITOR_THRESHOLD_PV="$IOC_MONITOR_THRESHOLD_PV"
+    export IOC_MONITOR_CONTROL_PV="$IOC_MONITOR_CONTROL_PV"
+    
     print_status "Starting Flask development server..."
+    print_status "PV Control enabled: $IOC_MONITOR_PV_CONTROL_ENABLED"
+    print_status "Debug logging: $IOC_MONITOR_DEBUG_LOG"
+    print_status "Threshold PV: $IOC_MONITOR_THRESHOLD_PV"
+    print_status "Control PV: $IOC_MONITOR_CONTROL_PV"
     print_status "Access the application at: http://localhost:5001"
     print_status "WebSocket SSH server at: ws://localhost:8022"
     print_status "API documentation at: http://localhost:5001/api"
@@ -376,7 +394,17 @@ deploy_production() {
     export FLASK_HOST=0.0.0.0
     export FLASK_PORT=5000
     
+    # Pass PV Control environment variables to the web app / PV Control 환경 변수를 웹 앱에 전달
+    export IOC_MONITOR_PV_CONTROL_ENABLED="$IOC_MONITOR_PV_CONTROL_ENABLED"
+    export IOC_MONITOR_DEBUG_LOG="$IOC_MONITOR_DEBUG_LOG"
+    export IOC_MONITOR_THRESHOLD_PV="$IOC_MONITOR_THRESHOLD_PV"
+    export IOC_MONITOR_CONTROL_PV="$IOC_MONITOR_CONTROL_PV"
+    
     print_status "Starting Gunicorn production server..."
+    print_status "PV Control enabled: $IOC_MONITOR_PV_CONTROL_ENABLED"
+    print_status "Debug logging: $IOC_MONITOR_DEBUG_LOG"
+    print_status "Threshold PV: $IOC_MONITOR_THRESHOLD_PV"
+    print_status "Control PV: $IOC_MONITOR_CONTROL_PV"
     print_status "Access the application at: http://localhost:5000"
     print_status "WebSocket SSH server at: ws://localhost:8022"
     print_status "Virtual environment: $VIRTUAL_ENV"

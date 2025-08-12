@@ -4,6 +4,21 @@
 
 EPICS Alive 기반의 IOC 모니터링/관리 웹 애플리케이션입니다. 오프라인 환경에서도 동작하도록 정적 자산(부트스트랩, xterm.js)을 로컬에 캐시합니다.
 
+## 시스템 아키텍처
+
+![IOC Monitor Architecture](iocmonitordiagram_v2.png)
+
+**IOC Monitor 시스템 구성도**
+
+IOC Monitor는 다음과 같은 주요 컴포넌트로 구성됩니다:
+
+- **Web Application**: Flask 기반 웹 인터페이스
+- **Alive Server**: EPICS Alive 기반 IOC 모니터링 서버
+- **PV Service**: EPICS PV 읽기/쓰기 및 자동 제어 서비스
+- **WebSocket SSH**: 브라우저 기반 SSH 터미널 서비스
+- **Log Service**: IOC 로그 및 시스템 로그 관리
+- **MCP Client**: Model Context Protocol 클라이언트 예제
+
 ## 주요 기능
 
 - **IOC 상태 모니터링**: 실시간 IOC 상태 확인
@@ -12,6 +27,8 @@ EPICS Alive 기반의 IOC 모니터링/관리 웹 애플리케이션입니다. �
 - **WebSocket SSH**: 브라우저에서 직접 SSH 접속
 - **환경 변수 표시**: IOC의 모든 환경 변수 확인
 - **PV Control**: BPC 기반 자동 PV 제어 기능 (선택적)
+- **API 문서**: 상세한 API 엔드포인트 문서 및 테스트 도구
+- **MCP 클라이언트**: Model Context Protocol을 통한 외부 시스템 연동
 
 ## 설치 및 실행 (처음 설치 포함)
 
@@ -127,7 +144,20 @@ IOC_MONITOR_PV_CONTROL_ENABLED=true
 
 ### 설정 방법
 
-#### 방법 1: .env 파일 사용 (권장)
+#### 방법 1: config.env 파일 사용 (권장)
+프로젝트 루트의 `config.env` 파일에서 설정:
+
+```bash
+# config.env 파일에 추가
+# PV Control Feature Configuration
+export IOC_MONITOR_PV_CONTROL_ENABLED=true
+export IOC_MONITOR_THRESHOLD_PV=MY-SYS:MACHINE:MODE
+export IOC_MONITOR_CONTROL_PV=MY-SYS:IOCM:READY
+```
+
+설정 후 웹 앱을 재시작하면 자동으로 적용됩니다.
+
+#### 방법 2: .env 파일 사용
 프로젝트 루트에 `.env` 파일을 생성하고 다음 내용을 추가:
 
 ```bash
@@ -137,7 +167,7 @@ IOC_MONITOR_THRESHOLD_PV=MY-SYS:MACHINE:MODE
 IOC_MONITOR_CONTROL_PV=MY-SYS:IOCM:READY
 ```
 
-#### 방법 2: 시스템 환경 변수 설정
+#### 방법 3: 시스템 환경 변수 설정
 ```bash
 # 현재 세션에만 적용
 export IOC_MONITOR_PV_CONTROL_ENABLED=true
@@ -151,7 +181,7 @@ echo 'export IOC_MONITOR_CONTROL_PV=MY-SYS:IOCM:READY' >> ~/.bashrc
 source ~/.bashrc
 ```
 
-#### 방법 3: 실행 시 직접 설정
+#### 방법 4: 실행 시 직접 설정
 ```bash
 IOC_MONITOR_PV_CONTROL_ENABLED=true ./deploy_web_app.sh development
 ```
@@ -171,6 +201,25 @@ IOC_MONITOR_PV_CONTROL_ENABLED=true ./deploy_web_app.sh development
 
 ### 웹 UI 표시
 PV Control 기능이 활성화되면 웹 대시보드에 "IOC Monitor Ready Status" 섹션이 표시됩니다.
+
+## API 문서 및 테스트
+
+### API 문서 페이지
+웹 애플리케이션에서 `/api/docs` 경로로 접근하여 모든 API 엔드포인트의 상세한 문서를 확인할 수 있습니다.
+
+### API 테스트 도구
+- **test_api.py**: API 엔드포인트 테스트를 위한 Python 스크립트
+- **API_README.md**: API 사용법 및 예제 코드 상세 문서
+
+### 주요 API 엔드포인트
+- **시스템 상태**: `/api/status`, `/api/ioc_count`
+- **IOC 정보**: `/api/alive/ioc_list`, `/api/alive/ioc_details`
+- **PV 제어**: `/api/pv/caget/<pvname>`, `/api/pv/caput/<pvname>`
+- **로그 관리**: `/api/ioc_logs/<iocname>`, `/api/events`
+- **관리 기능**: `/api/delete`, `/api/toggle_mask`
+
+### MCP 클라이언트 예제
+`mcp_client_example.py`를 통해 Model Context Protocol을 사용한 외부 시스템과의 연동 예제를 제공합니다.
 
 ## 주의사항 / Notes
 - EPICS Base/CA 툴이 없으면 일부 기능(caget/caput)이 제한됩니다.

@@ -3,6 +3,26 @@
 All notable changes to this project will be documented in this file.
 
 
+## [1.3.0] - 2025-08-12
+
+### Added
+- **API 문서 페이지**: `/api/docs` 경로를 통한 상세한 API 엔드포인트 문서 제공
+- **API 테스트 도구**: `test_api.py` 스크립트를 통한 API 엔드포인트 테스트 기능
+- **API 사용법 가이드**: `API_README.md` 파일을 통한 상세한 API 사용법 및 예제 코드
+- **MCP 클라이언트 예제**: `mcp_client_example.py`를 통한 Model Context Protocol 연동 예제
+- **시스템 아키텍처 다이어그램**: `iocmonitordiagram_v2.png`를 통한 시스템 구성 시각화
+- **README 업데이트**: 다이어그램과 API 관련 내용 추가로 문서화 개선
+
+### Enhanced
+- **웹 UI 개선**: API 문서 페이지를 통한 사용자 경험 향상
+- **문서화**: 시스템 아키텍처 및 API 사용법에 대한 상세한 설명 추가
+- **개발자 도구**: API 테스트 및 MCP 클라이언트 예제를 통한 개발 편의성 향상
+
+### Technical Improvements
+- **API 문서화**: 모든 API 엔드포인트에 대한 상세한 설명 및 사용 예제 제공
+- **외부 연동**: MCP 프로토콜을 통한 외부 시스템과의 연동 지원
+- **시각적 문서**: 시스템 구성 다이어그램을 통한 아키텍처 이해도 향상
+
 ## [1.2.0] - 2025-08-08
 
 ### Added

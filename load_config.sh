@@ -84,6 +84,20 @@ load_config() {
     export INSTALL_SCRIPT="${BASE_DIR}/install_alive.sh"
     export MAKEFILE_BACKUP="${ALIVE_SERVER_DIR}/Makefile.backup"
     
+    # Set PV Control environment variables if not already set / PV Control 환경 변수가 설정되지 않았다면 설정
+    if [ -z "$IOC_MONITOR_PV_CONTROL_ENABLED" ]; then
+        export IOC_MONITOR_PV_CONTROL_ENABLED=false
+    fi
+    if [ -z "$IOC_MONITOR_DEBUG_LOG" ]; then
+        export IOC_MONITOR_DEBUG_LOG=false
+    fi
+    if [ -z "$IOC_MONITOR_THRESHOLD_PV" ]; then
+        export IOC_MONITOR_THRESHOLD_PV="TEST-CTRL:SYS-MACHINE:MODE"
+    fi
+    if [ -z "$IOC_MONITOR_CONTROL_PV" ]; then
+        export IOC_MONITOR_CONTROL_PV="TEST-CTRL:SYS-IOCM:READY"
+    fi
+    
     # Verify environment variables / 환경 변수 확인
     if [ -z "$BASE_DIR" ]; then
         print_error "BASE_DIR environment variable not set."
@@ -107,6 +121,10 @@ show_config() {
     echo "  BUILD_DIR: $BUILD_DIR"
     echo "  ALIVED_CONFIG_FILE: $ALIVED_CONFIG_FILE"
     echo "  Cfg_File: $Cfg_File"
+    echo "  IOC_MONITOR_PV_CONTROL_ENABLED: $IOC_MONITOR_PV_CONTROL_ENABLED"
+    echo "  IOC_MONITOR_DEBUG_LOG: $IOC_MONITOR_DEBUG_LOG"
+    echo "  IOC_MONITOR_THRESHOLD_PV: $IOC_MONITOR_THRESHOLD_PV"
+    echo "  IOC_MONITOR_CONTROL_PV: $IOC_MONITOR_CONTROL_PV"
     echo ""
 }
 
@@ -123,4 +141,7 @@ main() {
 # Execute main function only when script is run directly / 스크립트가 직접 실행된 경우에만 main 함수 호출
 if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
     main "$@"
+else
+    # When sourced, load configuration immediately / 소스로 호출된 경우 즉시 설정 로드
+    load_config
 fi 

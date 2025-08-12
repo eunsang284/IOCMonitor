@@ -146,6 +146,7 @@ class Config:
     
     # PV Control feature - BPC-based IOC monitoring control / PV 제어 기능 - BPC 기반 IOC 모니터링 제어
     FEATURE_PV_CONTROL = os.environ.get("IOC_MONITOR_PV_CONTROL_ENABLED", "false").lower() == "true"
+    PV_CONTROL_DEBUG_LOG = os.environ.get("IOC_MONITOR_DEBUG_LOG", "false").lower() == "true"
     PV_CONTROL_THRESHOLD_PV = os.environ.get("IOC_MONITOR_THRESHOLD_PV", "TEST-CTRL:SYS-MACHINE:MODE")
     PV_CONTROL_CONTROL_PV = os.environ.get("IOC_MONITOR_CONTROL_PV", "TEST-CTRL:SYS-IOCM:READY")
     

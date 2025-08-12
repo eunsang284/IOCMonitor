@@ -358,6 +358,182 @@ def view_server_log():
     """View server log page / 서버 로그 페이지 표시"""
     return render_template("server_log.html")
 
+@app.route("/api/docs")
+def api_docs():
+    """API documentation page / API 문서 페이지"""
+    return render_template("api_docs.html")
+
+@app.route("/api/list")
+def api_list():
+    """Get all available APIs for MCP / MCP용 모든 사용 가능한 API 목록"""
+    apis = {
+        "system_status": {
+            "endpoint": "/api/status",
+            "method": "GET",
+            "description": "시스템 상태 조회 (IOC Monitor, SSH Server, Cache Server 등)",
+            "response": "JSON",
+            "mcp_usage": "시스템 전반적인 상태 모니터링"
+        },
+        "ioc_count": {
+            "endpoint": "/api/ioc_count",
+            "method": "GET", 
+            "description": "전체 IOC 개수 조회",
+            "response": "JSON",
+            "mcp_usage": "IOC 총 개수 파악"
+        },
+        "ioc_list": {
+            "endpoint": "/api/alive/ioc_list",
+            "method": "GET",
+            "description": "Alive 서버에서 IOC 목록 조회",
+            "response": "JSON",
+            "mcp_usage": "모든 IOC 이름 목록 가져오기"
+        },
+        "ioc_details": {
+            "endpoint": "/api/alive/ioc_details",
+            "method": "GET",
+            "description": "모든 IOC의 상세 정보 조회",
+            "response": "JSON",
+            "mcp_usage": "IOC 상태, IP, 업타임 등 상세 정보"
+        },
+        "ioc_detail": {
+            "endpoint": "/api/alive/ioc/<ioc_name>",
+            "method": "GET",
+            "description": "특정 IOC의 상세 정보 조회",
+            "response": "JSON",
+            "mcp_usage": "특정 IOC의 상태 및 정보 확인"
+        },
+        "ioc_status_summary": {
+            "endpoint": "/api/alive/status",
+            "method": "GET",
+            "description": "IOC 상태 요약 정보",
+            "response": "JSON",
+            "mcp_usage": "IOC 상태 통계 및 요약"
+        },
+        "faulted_iocs": {
+            "endpoint": "/api/alive/faulted",
+            "method": "GET",
+            "description": "현재 장애 상태인 IOC 정보",
+            "response": "JSON",
+            "mcp_usage": "장애 IOC 모니터링 및 알림"
+        },
+        "ioc_monitor_ready_status": {
+            "endpoint": "/api/ioc_monitor_ready/status",
+            "method": "GET",
+            "description": "IOC Monitor Ready 상태 조회",
+            "response": "JSON",
+            "mcp_usage": "IOC Monitor 제어 상태 확인"
+        },
+        "ioc_monitor_ready_set": {
+            "endpoint": "/api/ioc_monitor_ready/set",
+            "method": "POST",
+            "description": "IOC Monitor Ready 값 설정",
+            "response": "JSON",
+            "mcp_usage": "IOC Monitor 제어 값 설정"
+        },
+        "pv_caget": {
+            "endpoint": "/api/pv/caget/<pvname>",
+            "method": "GET",
+            "description": "PV 값 읽기 (caget 사용)",
+            "response": "JSON",
+            "mcp_usage": "EPICS PV 값 읽기"
+        },
+        "pv_caput": {
+            "endpoint": "/api/pv/caput/<pvname>",
+            "method": "POST",
+            "description": "PV 값 설정 (caput 사용)",
+            "response": "JSON",
+            "mcp_usage": "EPICS PV 값 설정"
+        },
+        "all_ioc_data": {
+            "endpoint": "/api/data",
+            "method": "GET",
+            "description": "모든 IOC 데이터 (마스크 상태 포함)",
+            "response": "JSON",
+            "mcp_usage": "전체 IOC 데이터 및 마스크 상태"
+        },
+        "ip_list": {
+            "endpoint": "/api/ip_list",
+            "method": "GET",
+            "description": "IOC IP 주소 목록",
+            "response": "JSON",
+            "mcp_usage": "IOC IP 주소 목록 조회"
+        },
+        "faulted_iocs_detailed": {
+            "endpoint": "/api/faulted_iocs",
+            "method": "GET",
+            "description": "장애 IOC 상세 정보 (마스크 제외)",
+            "response": "JSON",
+            "mcp_usage": "장애 IOC 상세 분석"
+        },
+        "control_states": {
+            "endpoint": "/api/control_states",
+            "method": "GET",
+            "description": "제어 상태 및 모니터링 데이터",
+            "response": "JSON",
+            "mcp_usage": "IOC 모니터링 상태 확인"
+        },
+        "ioc_logs": {
+            "endpoint": "/api/ioc_logs/<iocname>",
+            "method": "GET",
+            "description": "특정 IOC의 이벤트 로그",
+            "response": "JSON",
+            "mcp_usage": "IOC 이벤트 로그 분석"
+        },
+        "all_events": {
+            "endpoint": "/api/events",
+            "method": "GET",
+            "description": "모든 이벤트 캐시",
+            "response": "JSON",
+            "mcp_usage": "전체 이벤트 데이터"
+        },
+        "pv_search": {
+            "endpoint": "/api/pv/search",
+            "method": "GET",
+            "description": "PV 검색",
+            "response": "JSON",
+            "mcp_usage": "EPICS PV 검색"
+        },
+        "pv_detail": {
+            "endpoint": "/api/pv/<pvname>",
+            "method": "GET",
+            "description": "PV 상세 정보",
+            "response": "JSON",
+            "mcp_usage": "PV 상세 정보 조회"
+        },
+        "pv_autocomplete": {
+            "endpoint": "/api/pv/autocomplete",
+            "method": "GET",
+            "description": "PV 자동완성 제안",
+            "response": "JSON",
+            "mcp_usage": "PV 이름 자동완성"
+        },
+        "server_log_dates": {
+            "endpoint": "/api/server_log_dates",
+            "method": "GET",
+            "description": "서버 로그 날짜 목록",
+            "response": "JSON",
+            "mcp_usage": "로그 파일 날짜 목록"
+        },
+        "server_log_by_date": {
+            "endpoint": "/server_log/<date>",
+            "method": "GET",
+            "description": "특정 날짜의 서버 로그",
+            "response": "Text",
+            "mcp_usage": "날짜별 서버 로그 조회"
+        }
+    }
+    
+    return jsonify({
+        "total_apis": len(apis),
+        "base_url": "http://192.168.70.235:5001",
+        "apis": apis,
+        "mcp_integration": {
+            "description": "이 API들은 MCP(Model Context Protocol)에서 사용할 수 있습니다.",
+            "usage_example": "MCP 클라이언트에서 HTTP 요청을 통해 IOC 모니터 데이터에 접근할 수 있습니다.",
+            "authentication": "대부분의 API는 인증이 필요하지 않지만, 일부 관리 기능은 로그인이 필요합니다."
+        }
+    })
+
 @app.route("/server_log/<date>")
 def server_log_by_date(date):
     """Get server log by date / 날짜별 서버 로그 조회"""

@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IOC Monitor API Documentation</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .method-badge {
+            font-size: 0.8rem;
+            padding: 0.25rem 0.5rem;
+        }
+        .endpoint-code {
+            background-color: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 0.375rem;
+            padding: 0.5rem;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+        }
+        .mcp-section {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 2rem;
+            border-radius: 1rem;
+            margin-bottom: 2rem;
+        }
+        .search-box {
+            position: sticky;
+            top: 1rem;
+            z-index: 1000;
+            background: white;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .category-filter {
+            margin-bottom: 1rem;
+        }
+        .nav-pills .nav-link.active {
+            background-color: #667eea;
+        }
+        
+        /* 테이블 스타일 개선 */
+        .table {
+            margin-top: 0;
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        
+        .table th {
+            background-color: #343a40;
+            color: white;
+            font-weight: 600;
+            padding: 12px 8px;
+            border: none;
+            font-size: 0.85rem;
+        }
+        
+        .table td {
+            padding: 12px 8px;
+            vertical-align: middle;
+            border-bottom: 1px solid #dee2e6;
+        }
+        
+        .table tbody tr:hover {
+            background-color: #f8f9fa;
+            transition: background-color 0.2s;
+        }
+        
+        .table tbody tr:last-child td {
+            border-bottom: none;
+        }
+        
+        .endpoint-code {
+            background-color: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 4px;
+            padding: 4px 6px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.8rem;
+            color: #495057;
+        }
+        
+        .method-badge {
+            font-size: 0.75rem;
+            padding: 4px 8px;
+            font-weight: 600;
+        }
+        
+        .table-responsive {
+            border-radius: 8px;
+            overflow: hidden;
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid">
+        <!-- Header -->
+        <div class="row bg-primary text-white p-3 mb-4">
+            <div class="col">
+                <h1><i class="fas fa-code"></i> IOC Monitor API Documentation</h1>
+                <p class="mb-0">MCP(Model Context Protocol) 통합을 위한 API 가이드</p>
+            </div>
+        </div>
+
+        <!-- MCP Integration Section -->
+        <div class="mcp-section">
+            <div class="row">
+                <div class="col-md-8">
+                    <h2><i class="fas fa-plug"></i> MCP 통합 가이드</h2>
+                    <p class="lead">이 API들은 MCP(Model Context Protocol)에서 사용할 수 있습니다.</p>
+                    <ul>
+                        <li><strong>HTTP 기반:</strong> 모든 API는 표준 HTTP 요청으로 접근 가능</li>
+                        <li><strong>JSON 응답:</strong> 대부분의 API가 JSON 형식으로 데이터 반환</li>
+                        <li><strong>실시간 데이터:</strong> IOC 상태 및 모니터링 데이터 실시간 제공</li>
+                        <li><strong>EPICS 통합:</strong> EPICS PV 읽기/쓰기 기능 포함</li>
+                    </ul>
+                </div>
+                <div class="col-md-4 text-center">
+                    <div class="bg-white bg-opacity-25 p-3 rounded">
+                        <h4>Base URL</h4>
+                        <code class="text-white">http://192.168.70.235:5001</code>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Search and Filter -->
+        <div class="search-box">
+            <div class="row">
+                <div class="col-md-6">
+                    <input type="text" id="searchInput" class="form-control" placeholder="API 검색...">
+                </div>
+                <div class="col-md-6">
+                    <select id="categoryFilter" class="form-select">
+                        <option value="">모든 카테고리</option>
+                        <option value="system">시스템 상태</option>
+                        <option value="ioc">IOC 관리</option>
+                        <option value="pv">EPICS PV</option>
+                        <option value="logs">로그 및 이벤트</option>
+                        <option value="control">제어 및 모니터링</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <!-- Category Navigation -->
+        <div class="category-filter">
+            <ul class="nav nav-pills" id="categoryTabs">
+                <li class="nav-item">
+                    <a class="nav-link active" href="#" data-category="">전체</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#" data-category="system">시스템</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#" data-category="ioc">IOC</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#" href="#" data-category="pv">EPICS PV</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#" data-category="logs">로그</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#" data-category="control">제어</a>
+                </li>
+            </ul>
+        </div>
+
+        <!-- API List -->
+        <div id="apiList" class="row">
+            <!-- APIs will be loaded here -->
+        </div>
+
+        <!-- Loading Spinner -->
+        <div id="loading" class="text-center p-5">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- API Detail Modal -->
+    <div class="modal fade" id="apiModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="apiModalTitle">API 상세 정보</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body" id="apiModalBody">
+                    <!-- API details will be loaded here -->
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">닫기</button>
+                    <button type="button" class="btn btn-primary" id="testApiBtn">API 테스트</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        let allApis = [];
+        let filteredApis = [];
+
+        // Load APIs on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('DOM loaded, initializing...');
+            loadApis();
+            setupEventListeners();
+        });
+
+        function setupEventListeners() {
+            // Search functionality
+            document.getElementById('searchInput').addEventListener('input', filterApis);
+            
+            // Category filter
+            document.getElementById('categoryFilter').addEventListener('change', filterApis);
+            
+            // Category tabs
+            document.querySelectorAll('#categoryTabs .nav-link').forEach(tab => {
+                tab.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    document.querySelectorAll('#categoryTabs .nav-link').forEach(t => t.classList.remove('active'));
+                    this.classList.add('active');
+                    filterApis();
+                });
+            });
+        }
+
+        async function loadApis() {
+            try {
+                console.log('Loading APIs...');
+                const response = await fetch('/api/list');
+                const data = await response.json();
+                
+                console.log('API response:', data);
+                
+                // APIs 객체를 배열로 변환
+                if (data.apis && typeof data.apis === 'object') {
+                    allApis = Object.values(data.apis);
+                    console.log('Converted APIs to array:', allApis);
+                } else {
+                    console.warn('No APIs found in response, using empty array');
+                    allApis = [];
+                }
+                
+                filteredApis = [...allApis];
+                console.log('Filtered APIs:', filteredApis);
+                
+                renderApis();
+                document.getElementById('loading').style.display = 'none';
+            } catch (error) {
+                console.error('Failed to load APIs:', error);
+                document.getElementById('loading').innerHTML = '<div class="alert alert-danger">API 목록을 불러오는데 실패했습니다.</div>';
+            }
+        }
+
+        function filterApis() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            const categoryFilter = document.getElementById('categoryFilter').value;
+            const activeCategory = document.querySelector('#categoryTabs .nav-link.active').dataset.category;
+
+            // allApis가 배열인지 확인
+            if (!Array.isArray(allApis)) {
+                console.error('allApis is not an array:', allApis);
+                filteredApis = [];
+                renderApis();
+                return;
+            }
+
+            filteredApis = allApis.filter(api => {
+                const matchesSearch = api.description.toLowerCase().includes(searchTerm) || 
+                                    api.endpoint.toLowerCase().includes(searchTerm);
+                const matchesCategory = !categoryFilter || getApiCategory(api) === categoryFilter;
+                const matchesTab = !activeCategory || getApiCategory(api) === activeCategory;
+                
+                return matchesSearch && matchesCategory && matchesTab;
+            });
+
+            renderApis();
+        }
+
+        function getApiCategory(api) {
+            if (api.endpoint.includes('/status') || api.endpoint.includes('/count')) return 'system';
+            if (api.endpoint.includes('/ioc') || api.endpoint.includes('/alive')) return 'ioc';
+            if (api.endpoint.includes('/pv')) return 'pv';
+            if (api.endpoint.includes('/log') || api.endpoint.includes('/events')) return 'logs';
+            if (api.endpoint.includes('/control') || api.endpoint.includes('/monitor')) return 'control';
+            return 'system';
+        }
+
+        function renderApis() {
+            const container = document.getElementById('apiList');
+            container.innerHTML = '';
+
+            // filteredApis가 배열인지 확인
+            if (!Array.isArray(filteredApis)) {
+                console.error('filteredApis is not an array:', filteredApis);
+                container.innerHTML = '<div class="col-12 text-center p-5"><p>API 데이터 형식 오류가 발생했습니다.</p></div>';
+                return;
+            }
+
+            if (filteredApis.length === 0) {
+                container.innerHTML = '<div class="col-12 text-center p-5"><p>검색 결과가 없습니다.</p></div>';
+                return;
+            }
+
+            // 테이블 형태로 렌더링
+            const table = createApiTable(filteredApis);
+            container.appendChild(table);
+        }
+
+        function createApiTable(apis) {
+            const tableContainer = document.createElement('div');
+            tableContainer.className = 'col-12';
+            
+            // 반응형 테이블 래퍼
+            const tableWrapper = document.createElement('div');
+            tableWrapper.className = 'table-responsive';
+            
+            const table = document.createElement('table');
+            table.className = 'table table-striped table-hover';
+            table.style.fontSize = '0.9rem';
+            
+            // 테이블 헤더
+            const thead = document.createElement('thead');
+            thead.className = 'table-dark';
+            thead.innerHTML = `
+                <tr>
+                    <th style="min-width: 80px;">Method</th>
+                    <th style="min-width: 200px;">Endpoint</th>
+                    <th style="min-width: 250px;">Description</th>
+                    <th style="min-width: 180px;">MCP Usage</th>
+                    <th style="min-width: 80px;">Response</th>
+                    <th style="min-width: 100px;">Category</th>
+                    <th style="min-width: 100px;">Actions</th>
+                </tr>
+            `;
+            table.appendChild(thead);
+            
+            // 테이블 바디
+            const tbody = document.createElement('tbody');
+            
+            apis.forEach((api, index) => {
+                const row = document.createElement('tr');
+                
+                // API 객체의 속성에 안전하게 접근
+                const method = api.method || 'GET';
+                const description = api.description || '설명 없음';
+                const endpoint = api.endpoint || '엔드포인트 없음';
+                const mcpUsage = api.mcp_usage || 'MCP 사용법 없음';
+                const response = api.response || '응답 형식 없음';
+                const category = getApiCategory(api);
+                
+                const methodColor = getMethodColor(method);
+                
+                row.innerHTML = `
+                    <td>
+                        <span class="badge bg-${methodColor} method-badge">${method}</span>
+                    </td>
+                    <td>
+                        <code class="endpoint-code" style="font-size: 0.8rem;">${endpoint}</code>
+                    </td>
+                    <td>
+                        <div class="fw-bold">${description}</div>
+                    </td>
+                    <td>
+                        <small class="text-muted">${mcpUsage}</small>
+                    </td>
+                    <td>
+                        <span class="badge bg-secondary">${response}</span>
+                    </td>
+                    <td>
+                        <span class="badge bg-info">${category}</span>
+                    </td>
+                    <td>
+                        <button class="btn btn-sm btn-outline-primary" onclick="showApiDetails(${index})">
+                            상세보기
+                        </button>
+                    </td>
+                `;
+                
+                tbody.appendChild(row);
+            });
+            
+            table.appendChild(tbody);
+            tableWrapper.appendChild(table);
+            tableContainer.appendChild(tableWrapper);
+            
+            return tableContainer;
+        }
+
+        function getMethodColor(method) {
+            switch (method) {
+                case 'GET': return 'success';
+                case 'POST': return 'primary';
+                case 'PUT': return 'warning';
+                case 'DELETE': return 'danger';
+                default: return 'secondary';
+            }
+        }
+
+        function showApiDetails(apiKey) {
+            const api = allApis[apiKey];
+            if (!api) return;
+
+            // API 객체의 속성에 안전하게 접근
+            const method = api.method || 'GET';
+            const description = api.description || '설명 없음';
+            const endpoint = api.endpoint || '엔드포인트 없음';
+            const mcpUsage = api.mcp_usage || 'MCP 사용법 없음';
+            const response = api.response || '응답 형식 없음';
+
+            document.getElementById('apiModalTitle').textContent = description;
+            
+            const modalBody = document.getElementById('apiModalBody');
+            modalBody.innerHTML = `
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6>기본 정보</h6>
+                        <table class="table table-sm">
+                            <tr><td>엔드포인트:</td><td><code>${endpoint}</code></td></tr>
+                            <tr><td>메소드:</td><td><span class="badge bg-${getMethodColor(method)}">${method}</span></td></tr>
+                            <tr><td>응답 형식:</td><td>${response}</td></tr>
+                        </table>
+                    </div>
+                    <div class="col-md-6">
+                        <h6>MCP 사용법</h6>
+                        <p>${mcpUsage}</p>
+                        <h6>설명</h6>
+                        <p>${description}</p>
+                    </div>
+                </div>
+                <div class="row mt-3">
+                    <div class="col-12">
+                        <h6>사용 예시</h6>
+                        <div class="endpoint-code">
+                            <strong>URL:</strong> http://192.168.70.235:5001${endpoint}<br>
+                            <strong>Method:</strong> ${method}<br>
+                            ${method === 'POST' ? '<strong>Body:</strong> {"key": "value"}' : ''}
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            // Store API key for testing
+            document.getElementById('testApiBtn').onclick = () => testApi(api);
+            
+            const modal = new bootstrap.Modal(document.getElementById('apiModal'));
+            modal.show();
+        }
+
+        async function testApi(api) {
+            const testBtn = document.getElementById('testApiBtn');
+            const originalText = testBtn.textContent;
+            
+            testBtn.disabled = true;
+            testBtn.textContent = '테스트 중...';
+            
+            try {
+                // API 객체의 속성에 안전하게 접근
+                const method = api.method || 'GET';
+                const endpoint = api.endpoint || '';
+                
+                if (!endpoint) {
+                    throw new Error('엔드포인트가 정의되지 않았습니다.');
+                }
+                
+                let response;
+                if (method === 'GET') {
+                    response = await fetch(endpoint);
+                } else if (method === 'POST') {
+                    response = await fetch(endpoint, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({test: true})
+                    });
+                } else {
+                    throw new Error(`지원하지 않는 HTTP 메소드: ${method}`);
+                }
+                
+                const result = await response.text();
+                
+                // Show result in modal
+                const modalBody = document.getElementById('apiModalBody');
+                modalBody.innerHTML += `
+                    <div class="row mt-3">
+                        <div class="col-12">
+                            <h6>테스트 결과</h6>
+                            <div class="alert alert-${response.ok ? 'success' : 'danger'}">
+                                <strong>Status:</strong> ${response.status} ${response.statusText}<br>
+                                <strong>Response:</strong><br>
+                                <pre class="mt-2">${result}</pre>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+            } catch (error) {
+                const modalBody = document.getElementById('apiModalBody');
+                modalBody.innerHTML += `
+                    <div class="row mt-3">
+                        <div class="col-12">
+                            <h6>테스트 결과</h6>
+                            <div class="alert alert-danger">
+                                <strong>Error:</strong> ${error.message}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            } finally {
+                testBtn.disabled = false;
+                testBtn.textContent = originalText;
+            }
+        }
+    </script>
+</body>
+</html>

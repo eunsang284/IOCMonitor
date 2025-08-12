@@ -81,6 +81,7 @@
             <a href="/" class="{% if request.endpoint == 'index' %}active{% endif %}">Dashboard</a>
             <a href="/view/status" class="{% if request.endpoint == 'view_status_page' %}active{% endif %}">Server Status</a>
             <a href="/view/server_log" class="{% if request.endpoint == 'view_server_log' %}active{% endif %}">IOCMonitor Logs</a>
+            <a href="/api/docs" class="{% if request.endpoint == 'api_docs' %}active{% endif %}">API Docs</a>
             <div style="float: right;">
                 {% if session.get('logged_in') %}
                     <a href="/admin/logout">로그아웃</a>
